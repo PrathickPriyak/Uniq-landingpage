@@ -1,0 +1,10 @@
+.git
+.next
+node_modules
+npm-debug.log*
+pnpm-debug.log*
+.env
+.env*.local
+.vercel
+tsconfig.tsbuildinfo
+uniq-landingpage.zip

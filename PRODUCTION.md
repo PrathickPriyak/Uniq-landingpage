@@ -9,15 +9,18 @@ The application is deployed on the Hostinger KVM at:
 
 ## Server Runtime
 
-The server runs the Next.js production app with PM2 and exposes it through Nginx:
+The server can run the Next.js production app through Docker or PM2 and exposes it through Nginx:
 
 ```bash
+docker compose ps
 pm2 status uniq-landingpage
 systemctl status nginx
 ```
 
 Nginx proxies public HTTP traffic from port `80` to the app on `127.0.0.1:3000`.
 The matching Nginx config is stored in `deploy/nginx/uniq-landingpage.conf`.
+
+The root `Dockerfile` and `docker-compose.yml` are included so Hostinger's Docker Projects panel can build and run the application with one container.
 
 ## Cloudflare DNS
 
