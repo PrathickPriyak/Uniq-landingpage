@@ -12,6 +12,13 @@ export default function ThankYouPage() {
   useEffect(() => {
     // Fire conversion ONCE per session using sessionStorage guard
     if (!sessionStorage.getItem("conversion_tracked")) {
+      // --- Google Tag Manager lead conversion ---
+      if (typeof window !== "undefined") {
+        const w = window as Window & { dataLayer?: Record<string, unknown>[] }
+        w.dataLayer = w.dataLayer || []
+        w.dataLayer.push({ event: "lead_form_submit" })
+      }
+
       // --- Google Ads conversion (replace with your actual send_to value) ---
       if (typeof window !== "undefined" && (window as any).gtag) {
         ;(window as any).gtag("event", "conversion", {
