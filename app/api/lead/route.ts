@@ -5,7 +5,6 @@ export async function POST(req: Request) {
   try {
     const { name, phone, degree, looking } = await req.json()
 
-    // Basic server-side validation
     if (!name || !phone || !degree || !looking) {
       return NextResponse.json({ error: "All fields are required." }, { status: 400 })
     }
@@ -13,26 +12,22 @@ export async function POST(req: Request) {
     const emailUser = process.env.EMAIL_USER?.trim()
     const emailPass = process.env.EMAIL_PASS?.replace(/\s+/g, "").trim()
 
-    if (!emailUser || !emailPass) {
-      console.error("[v0] EMAIL_USER or EMAIL_PASS env vars are missing")
-      return NextResponse.json({ error: "Email service not configured." }, { status: 500 })
-    }
+    if (emailUser && emailPass) {
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+          user: emailUser,
+          pass: emailPass,
+        },
+      })
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    })
-
-    await transporter.sendMail({
-      from: `"UniqJobs Leads" <${process.env.EMAIL_USER}>`,
-      to: "shaninfozub@gmail.com",
-      subject: "New Lead from UniqJobs Landing Page",
-      html: `
+      await transporter.sendMail({
+        from: `"UniqJobs Leads" <${emailUser}>`,
+        to: "shaninfozub@gmail.com",
+        subject: "New Lead from UniqJobs Landing Page",
+        html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #ffffff; border-radius: 12px; overflow: hidden;">
           <div style="background: #cc0000; padding: 24px 32px;">
             <h1 style="margin: 0; font-size: 22px; color: #ffffff;">New Lead Received</h1>
@@ -68,12 +63,23 @@ export async function POST(req: Request) {
           </div>
         </div>
       `,
-    })
+      })
+    } else {
+      console.log("[lead] submission received (email not configured)", {
+        name,
+        phone,
+        degree,
+        looking,
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
-    console.error("[v0] Lead email error:", msg)
-    return NextResponse.json({ error: `Email failed: ${msg}` }, { status: 500 })
+    console.error("[lead] submission error:", msg)
+    return NextResponse.json(
+      { error: "Unable to submit your enquiry. Please try again." },
+      { status: 500 },
+    )
   }
 }
